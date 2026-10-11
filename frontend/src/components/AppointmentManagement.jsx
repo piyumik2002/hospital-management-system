@@ -10,6 +10,12 @@ export default function AppointmentManagement() {
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
 
+    // Retrieve current logged-in user details to check role permissions
+    const userJson = localStorage.getItem('user');
+    const currentUser = userJson ? JSON.parse(userJson) : null;
+    const isDoctor = currentUser?.role === 'Doctor';
+    const isAdminOrStaff = currentUser?.role === 'Admin' || currentUser?.role === 'Receptionist' || currentUser?.role === 'Nurse';
+
     // Form state for booking / rescheduling
     const [formData, setFormData] = useState({
         department: '',
@@ -35,7 +41,6 @@ export default function AppointmentManagement() {
     const fetchAppointments = async () => {
         try {
             const token = localStorage.getItem('token');
-            // Use environment variable for API base URL, fallback to localhost for local development
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
             const response = await axios.get(`${API_URL}/api/appointments`, {
@@ -50,7 +55,6 @@ export default function AppointmentManagement() {
     const fetchDoctors = async () => {
         try {
             const token = localStorage.getItem('token');
-            // Use environment variable for API base URL, fallback to localhost for local development
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
             const response = await axios.get(`${API_URL}/api/doctors`, {
@@ -82,17 +86,9 @@ export default function AppointmentManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
-            // Retrieve current logged-in user from localStorage to attach patient details
-            const userJson = localStorage.getItem('user');
-            const currentUser = userJson ? JSON.parse(userJson) : null;
-            
-            // Determine patient name and ID safely
             const patientName = currentUser?.username || currentUser?.name || 'Patient';
-
-            // Use environment variable for API base URL, fallback to localhost for local development
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-            // Include patient name and ID in the payload to satisfy backend requirements
             const payload = {
                 ...formData,
                 patientName: patientName,
@@ -100,7 +96,6 @@ export default function AppointmentManagement() {
             };
 
             if (isRescheduling) {
-                // Allow department, doctor, date and time updates during rescheduling and send full payload
                 await axios.put(`${API_URL}/api/appointments/${currentAppointmentId}`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -122,11 +117,26 @@ export default function AppointmentManagement() {
         }
     };
 
+    // Update appointment status directly (Only Doctors can Confirm or Complete)
+    const handleStatusUpdate = async (id, newStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.put(`${API_URL}/api/appointments/${id}`, { status: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSuccessMsg(`Appointment status updated to ${newStatus}!`);
+            fetchAppointments();
+        } catch (err) {
+            setError('Failed to update appointment status.');
+        }
+    };
+
     const handleCancel = async (id) => {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
             try {
                 const token = localStorage.getItem('token');
-                // Use environment variable for API base URL, fallback to localhost for local development
                 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
                 await axios.delete(`${API_URL}/api/appointments/${id}`, {
@@ -143,8 +153,6 @@ export default function AppointmentManagement() {
     const handleReschedule = (appointment) => {
         setIsRescheduling(true);
         setCurrentAppointmentId(appointment._id);
-        
-        // Ensure proper matching of doctor ID and name during rescheduling popup open
         setFormData({
             department: appointment.department || '',
             doctor: appointment.doctor || '',
@@ -193,7 +201,7 @@ export default function AppointmentManagement() {
                 {/* Back button */}
                 <div className="mb-6">
                     <button 
-                        onClick={() => navigate('/admin-dashboard')}
+                        onClick={() => navigate(isDoctor ? '/doctor-dashboard' : '/admin-dashboard')}
                         className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl shadow-sm hover:bg-gray-100 transition flex items-center gap-2"
                     >
                         <span>← Back to Portal</span>
@@ -204,14 +212,18 @@ export default function AppointmentManagement() {
                 <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-8 text-white shadow-lg mb-8 flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold tracking-wide">Appointment Management 📅</h1>
-                        <p className="text-blue-100 text-sm mt-1">Book, track, reschedule, or cancel your hospital appointments.</p>
+                        <p className="text-blue-100 text-sm mt-1">
+                            {isDoctor ? 'Review patient bookings, confirm appointments, and track consultations.' : 'Book, track, reschedule, or cancel your hospital appointments.'}
+                        </p>
                     </div>
-                    <button 
-                        onClick={() => { resetForm(); setShowModal(true); }}
-                        className="px-5 py-2.5 bg-white text-blue-600 font-semibold rounded-xl shadow-md hover:bg-blue-50 transition flex items-center gap-2"
-                    >
-                        <span>+ Book New Appointment</span>
-                    </button>
+                    {!isDoctor && (
+                        <button 
+                            onClick={() => { resetForm(); setShowModal(true); }}
+                            className="px-5 py-2.5 bg-white text-blue-600 font-semibold rounded-xl shadow-md hover:bg-blue-50 transition flex items-center gap-2"
+                        >
+                            <span>+ Book New Appointment</span>
+                        </button>
+                    )}
                 </div>
 
                 {successMsg && (
@@ -239,7 +251,7 @@ export default function AppointmentManagement() {
                                 {appointments.length > 0 ? (
                                     appointments.map((apt) => (
                                         <tr key={apt._id} className="hover:bg-gray-50 transition">
-                                            <td className="py-4 px-6 font-semibold text-gray-800">{apt.department}</td>
+                                            <td className="py-4 px-6">{apt.department}</td>
                                             <td className="py-4 px-6 text-blue-600 font-medium">{apt.doctorName}</td>
                                             <td className="py-4 px-6">{apt.appointmentDate}</td>
                                             <td className="py-4 px-6">{apt.appointmentTime}</td>
@@ -249,7 +261,28 @@ export default function AppointmentManagement() {
                                                 </span>
                                             </td>
                                             <td className="py-4 px-6 text-center space-x-2">
-                                                {apt.status !== 'Cancelled' && apt.status !== 'Completed' && (
+                                                {/* Only Doctor can Confirm Pending appointments */}
+                                                {isDoctor && apt.status === 'Pending' && (
+                                                    <button 
+                                                        onClick={() => handleStatusUpdate(apt._id, 'Confirmed')}
+                                                        className="px-3 py-1.5 bg-green-50 text-green-600 font-medium rounded-lg hover:bg-green-100 transition"
+                                                    >
+                                                        Confirm
+                                                    </button>
+                                                )}
+
+                                                {/* Only Doctor can Complete Confirmed appointments */}
+                                                {isDoctor && apt.status === 'Confirmed' && (
+                                                    <button 
+                                                        onClick={() => handleStatusUpdate(apt._id, 'Completed')}
+                                                        className="px-3 py-1.5 bg-blue-50 text-blue-600 font-medium rounded-lg hover:bg-blue-100 transition"
+                                                    >
+                                                        Complete
+                                                    </button>
+                                                )}
+
+                                                {/* Admin / Receptionist / Patient Reschedule and Cancel options */}
+                                                {!isDoctor && apt.status !== 'Cancelled' && apt.status !== 'Completed' && (
                                                     <>
                                                         <button 
                                                             onClick={() => handleReschedule(apt)}
@@ -272,7 +305,7 @@ export default function AppointmentManagement() {
                                     <tr>
                                         <td colSpan="6" className="py-12 text-center text-gray-400">
                                             <p className="text-base font-medium">No appointments found.</p>
-                                            <p className="text-xs mt-1">Click on "+ Book New Appointment" to schedule one.</p>
+                                            {!isDoctor && <p className="text-xs mt-1">Click on "+ Book New Appointment" to schedule one.</p>}
                                         </td>
                                     </tr>
                                 )}

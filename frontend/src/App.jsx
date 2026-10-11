@@ -249,7 +249,7 @@ function AdminDashboard() {
                         </div>
                     )}
 
-                    {/* Doctor Management Card (Visible to Admin Only - Removed from Receptionist) */}
+                    {/* Doctor Management Card (Visible to Admin Only) */}
                     {isAdmin && (
                         <div 
                             onClick={() => navigate('/doctors')}
@@ -260,7 +260,7 @@ function AdminDashboard() {
                         </div>
                     )}
 
-                    {/* Staff Management Card (Visible to Admin and Receptionist for viewing staff/attendance) */}
+                    {/* Staff Management Card (Visible to Admin and Receptionist) */}
                     {(isAdmin || isReceptionist) && (
                         <div 
                             onClick={() => navigate('/staff')}
@@ -334,7 +334,16 @@ function DoctorDashboard() {
                     <p className="text-blue-100">Here is your daily medical schedule and patient overview.</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                    {/* Appointments Card for Doctors */}
+                    <div 
+                        onClick={() => navigate('/appointments')}
+                        className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-md hover:border-blue-400 transition"
+                    >
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">Appointments 📅</h3>
+                        <p className="text-gray-600 text-sm">View patient bookings, confirm status, and track consultations.</p>
+                    </div>
+
                     {/* Patient Records Card */}
                     <div 
                         onClick={() => navigate('/patients')}
@@ -362,7 +371,7 @@ function DoctorDashboard() {
                         <p className="text-gray-600 text-sm">Check medicine stock levels and expiry status.</p>
                     </div>
 
-                    {/* Prescriptions Card with navigation */}
+                    {/* Prescriptions Card */}
                     <div 
                         onClick={() => navigate('/doctor-prescription')}
                         className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-md hover:border-blue-400 transition"
@@ -426,17 +435,17 @@ export default function App() {
                     } 
                 />
 
-                {/* Appointment Management Route (Allowed for Admin, Receptionist, and Nurse) */}
+                {/* Appointment Management Route (Allowed for Admin, Receptionist, Nurse, and Doctor) */}
                 <Route 
                     path="/appointments" 
                     element={
-                        <ProtectedRoute allowedRoles={['Admin', 'Receptionist', 'Nurse']}>
+                        <ProtectedRoute allowedRoles={['Admin', 'Receptionist', 'Nurse', 'Doctor']}>
                             <AppointmentManagement />
                         </ProtectedRoute>
                     } 
                 />
 
-                {/* Patient Management Route (Allowed for Nurse too) */}
+                {/* Patient Management Route */}
                 <Route 
                     path="/patients" 
                     element={
@@ -446,7 +455,7 @@ export default function App() {
                     } 
                 />
 
-                {/* Doctor Management Route (Admin Only - Restricted from Receptionist) */}
+                {/* Doctor Management Route */}
                 <Route 
                     path="/doctors" 
                     element={
@@ -456,7 +465,7 @@ export default function App() {
                     } 
                 />
 
-                {/* Laboratory Management Route (Allowed for Lab Technicians and Nurse) */}
+                {/* Laboratory Management Route */}
                 <Route 
                     path="/lab-management" 
                     element={
@@ -506,7 +515,7 @@ export default function App() {
                     } 
                 />
 
-                {/* Staff Management Route (Allowed for Admin and Receptionist) */}
+                {/* Staff Management Route */}
                 <Route 
                     path="/staff" 
                     element={

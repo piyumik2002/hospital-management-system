@@ -1,12 +1,32 @@
 const Appointment = require('../models/Appointment');
+const Doctor = require('../models/Doctor');
 
-// Get all appointments (Admin/Doctor can view all, Patient views their own)
+// Get all appointments (Admin/Doctor can view all or assigned ones, Patient views their own)
 exports.getAppointments = async (req, res) => {
     try {
         let filter = {};
+        
+        // Filter appointments based on user role
         if (req.user.role === 'Patient') {
             filter.patient = req.user.id;
+        } else if (req.user.role === 'Doctor') {
+            // Find doctor profile linked to user to match assigned appointments
+            const doctorProfile = await Doctor.findOne({ 
+                $or: [{ email: req.user.email }, { name: new RegExp(req.user.username, 'i') }] 
+            });
+            
+            // Allow matching either by Doctor ObjectId, Doctor Name, or username containing doctor name
+            if (doctorProfile) {
+                filter.$or = [
+                    { doctor: doctorProfile._id },
+                    { doctorName: new RegExp(doctorProfile.name, 'i') },
+                    { doctorName: new RegExp(req.user.username, 'i') }
+                ];
+            } else {
+                filter.doctorName = new RegExp(req.user.username, 'i');
+            }
         }
+
         const appointments = await Appointment.find(filter).sort({ createdAt: -1 });
         res.status(200).json(appointments);
     } catch (error) {
