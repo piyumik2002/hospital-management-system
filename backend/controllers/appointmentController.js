@@ -49,14 +49,18 @@ exports.bookAppointment = async (req, res) => {
     }
 };
 
-// Update Appointment Status (Confirm, Complete, Cancel, or Reschedule)
+// Update Appointment Status, Department, Doctor, or Schedule
 exports.updateAppointmentStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status, appointmentDate, appointmentTime } = req.body;
+        // Destructure department, doctor, and doctorName along with status, date and time
+        const { status, department, doctor, doctorName, appointmentDate, appointmentTime } = req.body;
 
         const updateData = {};
         if (status) updateData.status = status;
+        if (department) updateData.department = department;
+        if (doctor) updateData.doctor = doctor;
+        if (doctorName) updateData.doctorName = doctorName;
         if (appointmentDate) updateData.appointmentDate = appointmentDate;
         if (appointmentTime) updateData.appointmentTime = appointmentTime;
 

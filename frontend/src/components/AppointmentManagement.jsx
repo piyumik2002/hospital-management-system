@@ -82,19 +82,31 @@ export default function AppointmentManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
+            // Retrieve current logged-in user from localStorage to attach patient details
+            const userJson = localStorage.getItem('user');
+            const currentUser = userJson ? JSON.parse(userJson) : null;
+            
+            // Determine patient name and ID safely
+            const patientName = currentUser?.username || currentUser?.name || 'Patient';
+
             // Use environment variable for API base URL, fallback to localhost for local development
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
+            // Include patient name and ID in the payload to satisfy backend requirements
+            const payload = {
+                ...formData,
+                patientName: patientName,
+                patient: currentUser?._id || currentUser?.id
+            };
+
             if (isRescheduling) {
-                await axios.put(`${API_URL}/api/appointments/${currentAppointmentId}`, {
-                    appointmentDate: formData.appointmentDate,
-                    appointmentTime: formData.appointmentTime
-                }, {
+                // Allow department, doctor, date and time updates during rescheduling and send full payload
+                await axios.put(`${API_URL}/api/appointments/${currentAppointmentId}`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Appointment rescheduled successfully!');
             } else {
-                await axios.post(`${API_URL}/api/appointments`, formData, {
+                await axios.post(`${API_URL}/api/appointments`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Appointment booked successfully!');
@@ -131,12 +143,14 @@ export default function AppointmentManagement() {
     const handleReschedule = (appointment) => {
         setIsRescheduling(true);
         setCurrentAppointmentId(appointment._id);
+        
+        // Ensure proper matching of doctor ID and name during rescheduling popup open
         setFormData({
-            department: appointment.department,
-            doctor: appointment.doctor,
-            doctorName: appointment.doctorName,
-            appointmentDate: appointment.appointmentDate,
-            appointmentTime: appointment.appointmentTime
+            department: appointment.department || '',
+            doctor: appointment.doctor || '',
+            doctorName: appointment.doctorName || '',
+            appointmentDate: appointment.appointmentDate || '',
+            appointmentTime: appointment.appointmentTime || ''
         });
         setShowModal(true);
     };
@@ -163,8 +177,15 @@ export default function AppointmentManagement() {
         }
     };
 
-    // Filter doctors based on selected department
-    const filteredDoctorsByDept = doctors.filter(doc => doc.department === formData.department);
+    // Filter doctors based on selected department (case-insensitive and flexible match)
+    const filteredDoctorsByDept = doctors.filter(doc => {
+        if (!formData.department) return false;
+        const docDept = (doc.department || '').trim().toLowerCase();
+        const docSpec = (doc.specialization || '').trim().toLowerCase();
+        const selectedDept = formData.department.trim().toLowerCase();
+        
+        return docDept === selectedDept || docSpec === selectedDept || docDept.includes(selectedDept) || selectedDept.includes(docDept);
+    });
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -278,7 +299,6 @@ export default function AppointmentManagement() {
                                         name="department" 
                                         value={formData.department} 
                                         onChange={handleDepartmentChange} 
-                                        disabled={isRescheduling}
                                         required 
                                         className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
                                     >
@@ -295,7 +315,7 @@ export default function AppointmentManagement() {
                                         name="doctor" 
                                         value={formData.doctor} 
                                         onChange={handleDoctorChange} 
-                                        disabled={isRescheduling || !formData.department}
+                                        disabled={!formData.department}
                                         required 
                                         className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
                                     >
