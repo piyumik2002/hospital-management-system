@@ -44,7 +44,10 @@ export default function LabManagement() {
     const fetchLabTests = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/lab-tests', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/lab-tests`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setLabTests(response.data);
@@ -56,7 +59,10 @@ export default function LabManagement() {
     const fetchPatients = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/patients', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/patients`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPatients(response.data);
@@ -71,7 +77,10 @@ export default function LabManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/lab-tests', requestData, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.post(`${API_URL}/api/lab-tests`, requestData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMsg('Lab test requested successfully!');
@@ -88,7 +97,10 @@ export default function LabManagement() {
     const handleUpdateStatus = async (id, status) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/lab-tests/${id}/status`, { status }, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.put(`${API_URL}/api/lab-tests/${id}/status`, { status }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMsg(`Status updated to "${status}"!`);
@@ -104,7 +116,10 @@ export default function LabManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/lab-tests/${currentTest._id}/results`, resultData, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.put(`${API_URL}/api/lab-tests/${currentTest._id}/results`, resultData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMsg('Test results entered successfully!');

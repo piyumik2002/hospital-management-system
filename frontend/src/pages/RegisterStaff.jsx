@@ -37,9 +37,12 @@ export default function RegisterStaff() {
         try {
             const token = localStorage.getItem('token');
             
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            
             // Updated API endpoint to match server route prefix (/api/auth)
             const response = await axios.post(
-                'http://localhost:5000/api/auth/register-staff',
+                `${API_URL}/api/auth/register-staff`,
                 formData,
                 {
                     headers: { Authorization: `Bearer ${token}` }

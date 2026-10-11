@@ -39,7 +39,10 @@ export default function PatientManagement() {
     const fetchPatients = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/patients', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/patients`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPatients(response.data);
@@ -60,7 +63,10 @@ export default function PatientManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/patients', formData, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.post(`${API_URL}/api/patients`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMsg('Patient registered successfully!');

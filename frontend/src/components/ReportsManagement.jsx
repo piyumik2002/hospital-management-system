@@ -16,7 +16,10 @@ export default function ReportsManagement() {
     const fetchReports = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/reports', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/reports`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setReportData(response.data.reports);

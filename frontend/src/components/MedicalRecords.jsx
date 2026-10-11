@@ -10,7 +10,10 @@ export default function MedicalRecords({ patientId }) {
     useEffect(() => {
         const fetchMedicalHistory = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/medical-records/patient/${patientId}`);
+                // Use environment variable for API base URL, fallback to localhost for local development
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+                const response = await axios.get(`${API_URL}/api/medical-records/patient/${patientId}`);
                 setRecords(response.data);
             } catch (err) {
                 setError('Failed to load medical records.');

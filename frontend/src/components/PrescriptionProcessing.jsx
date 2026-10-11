@@ -18,7 +18,10 @@ export default function PrescriptionProcessing() {
     const fetchPrescriptions = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/prescriptions', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/prescriptions`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPrescriptions(response.data);
@@ -40,7 +43,10 @@ export default function PrescriptionProcessing() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(`http://localhost:5000/api/prescriptions/${id}/dispense`, {}, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.put(`${API_URL}/api/prescriptions/${id}/dispense`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

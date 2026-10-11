@@ -32,7 +32,10 @@ export default function StaffManagement() {
     const fetchEmployees = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/employees', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            
+            const response = await axios.get(`${API_URL}/api/employees`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEmployees(response.data);
@@ -51,7 +54,10 @@ export default function StaffManagement() {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/employees', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.post(`${API_URL}/api/employees`, {
                 fullName,
                 email,
                 phone,
@@ -82,7 +88,10 @@ export default function StaffManagement() {
         if (!isAdmin) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/employees/${id}`, updatedData, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.put(`${API_URL}/api/employees/${id}`, updatedData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMsg('Employee details updated successfully!');
@@ -99,7 +108,10 @@ export default function StaffManagement() {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/employees/${id}`, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.delete(`${API_URL}/api/employees/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccessMsg('Employee removed successfully!');

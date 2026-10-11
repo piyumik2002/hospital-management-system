@@ -11,8 +11,11 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
             // Send login request to backend
-            const response = await axios.post('http://localhost:5000/api/auth/login', {
+            const response = await axios.post(`${API_URL}/api/auth/login`, {
                 email,
                 password
             });

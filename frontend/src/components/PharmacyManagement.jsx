@@ -35,7 +35,10 @@ export default function PharmacyManagement() {
     const fetchMedicines = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/pharmacy', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/pharmacy`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMedicines(response.data);
@@ -59,13 +62,16 @@ export default function PharmacyManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
             if (isEditing) {
-                await axios.put(`http://localhost:5000/api/pharmacy/${currentId}`, formData, {
+                await axios.put(`${API_URL}/api/pharmacy/${currentId}`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Medicine updated successfully!');
             } else {
-                await axios.post('http://localhost:5000/api/pharmacy', formData, {
+                await axios.post(`${API_URL}/api/pharmacy`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Medicine added to inventory successfully!');
@@ -102,7 +108,10 @@ export default function PharmacyManagement() {
         if (window.confirm('Are you sure you want to delete this medicine?')) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`http://localhost:5000/api/pharmacy/${id}`, {
+                // Use environment variable for API base URL, fallback to localhost for local development
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+                await axios.delete(`${API_URL}/api/pharmacy/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Medicine deleted successfully!');

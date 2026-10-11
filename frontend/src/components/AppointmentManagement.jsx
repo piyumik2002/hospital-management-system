@@ -35,7 +35,10 @@ export default function AppointmentManagement() {
     const fetchAppointments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/appointments', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/appointments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setAppointments(response.data);
@@ -47,7 +50,10 @@ export default function AppointmentManagement() {
     const fetchDoctors = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/doctors', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/doctors`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setDoctors(response.data);
@@ -76,8 +82,11 @@ export default function AppointmentManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
             if (isRescheduling) {
-                await axios.put(`http://localhost:5000/api/appointments/${currentAppointmentId}`, {
+                await axios.put(`${API_URL}/api/appointments/${currentAppointmentId}`, {
                     appointmentDate: formData.appointmentDate,
                     appointmentTime: formData.appointmentTime
                 }, {
@@ -85,7 +94,7 @@ export default function AppointmentManagement() {
                 });
                 setSuccessMsg('Appointment rescheduled successfully!');
             } else {
-                await axios.post('http://localhost:5000/api/appointments', formData, {
+                await axios.post(`${API_URL}/api/appointments`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Appointment booked successfully!');
@@ -105,7 +114,10 @@ export default function AppointmentManagement() {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`http://localhost:5000/api/appointments/${id}`, {
+                // Use environment variable for API base URL, fallback to localhost for local development
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+                await axios.delete(`${API_URL}/api/appointments/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Appointment cancelled successfully!');

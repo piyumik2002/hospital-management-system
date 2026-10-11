@@ -29,7 +29,7 @@ export default function MedicalRecordForm({ patientId, onRecordAdded, onClose })
         try {
             const token = localStorage.getItem('token');
             
-            // Backend එක බලාපොරොත්තු වන ආකෘතියට හරියටම සකස් කිරීම
+            // Format payload according to backend schema expectations
             const payload = {
                 patientId,
                 date: formData.date,
@@ -50,7 +50,10 @@ export default function MedicalRecordForm({ patientId, onRecordAdded, onClose })
                 ] : []
             };
 
-            await axios.post('http://localhost:5000/api/medical-records/add', payload, {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.post(`${API_URL}/api/medical-records/add`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

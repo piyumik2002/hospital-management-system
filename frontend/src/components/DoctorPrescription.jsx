@@ -28,9 +28,12 @@ export default function DoctorPrescription() {
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
 
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
             const [patientsRes, medicinesRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/patients', { headers }),
-                axios.get('http://localhost:5000/api/pharmacy', { headers })
+                axios.get(`${API_URL}/api/patients`, { headers }),
+                axios.get(`${API_URL}/api/pharmacy`, { headers })
             ]);
 
             setPatients(patientsRes.data);
@@ -78,7 +81,10 @@ export default function DoctorPrescription() {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/prescriptions', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            await axios.post(`${API_URL}/api/prescriptions`, {
                 patientName: selectedPatient,
                 doctorName: doctorUser?.username ? `Dr. ${doctorUser.username}` : 'Dr. Doctor',
                 medicines: prescribedMedicines

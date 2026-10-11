@@ -32,7 +32,10 @@ export default function DoctorManagement() {
     const fetchDoctors = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/doctors', {
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/doctors`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setDoctors(response.data);
@@ -60,13 +63,16 @@ export default function DoctorManagement() {
         setError('');
         try {
             const token = localStorage.getItem('token');
+            // Use environment variable for API base URL, fallback to localhost for local development
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
             if (isEditing) {
-                await axios.put(`http://localhost:5000/api/doctors/${currentDoctorId}`, formData, {
+                await axios.put(`${API_URL}/api/doctors/${currentDoctorId}`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Doctor details updated successfully!');
             } else {
-                await axios.post('http://localhost:5000/api/doctors', formData, {
+                await axios.post(`${API_URL}/api/doctors`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Doctor registered successfully!');
@@ -100,7 +106,10 @@ export default function DoctorManagement() {
         if (window.confirm('Are you sure you want to delete this doctor?')) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`http://localhost:5000/api/doctors/${id}`, {
+                // Use environment variable for API base URL, fallback to localhost for local development
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+                await axios.delete(`${API_URL}/api/doctors/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSuccessMsg('Doctor deleted successfully!');
